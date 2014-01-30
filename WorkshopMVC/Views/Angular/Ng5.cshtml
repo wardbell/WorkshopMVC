@@ -1,0 +1,48 @@
+﻿@model string
+@{
+    ViewBag.Title = "Ng Sample #5";
+}
+
+<h2>Angular Sample #5</h2>
+<h3>Bootstrapping data with templates</h3>
+<hr />
+
+<div ng-app="app">
+    <div ng-include="'/app/shell.html'"></div>
+</div>
+
+@section scripts
+{
+    <script src="~/Scripts/angular.js"></script>
+
+    <script src="~/common/common.module.js"></script>    
+    <script src="~/common/common.errorPanel.js"></script>
+    <script src="~/common/common.errorService.js"></script>
+
+    <script src="~/app/app.js"></script>
+    <script src="~/app/config.js"></script>
+    <script src="~/app/shell.js"></script>
+
+    <script src="~/app/ng5/food.js"></script>
+    <script src="~/app/ng5/food$scope.js"></script>
+    <script src="~/app/ng5/message.js"></script>
+    <script>
+
+        // Add a service to get data for the application
+        // HAVE TO EMBED THIS SCRIPT IN THE RAZOR PAGE
+        // THIS ONLY WORKS BECAUSE RAZOR CAN INJECT THE BOOTSTRAP MODEL!
+        angular.module('app').factory('datacontext', datacontext);
+        
+        function datacontext() {
+            var model = @Html.Raw(Model); // Still silly but indulge me
+            console.log(model);
+            return {
+                getFoods: function () { return model.foods; },
+                getMessage: function () { return model.message; }
+            };
+        };
+
+    </script>
+}
+
+

@@ -1,0 +1,74 @@
+﻿@model string
+@{
+    ViewBag.Title = "Ng Sample #3";
+}
+
+<h2>Angular Sample #3</h2>
+<h3>Bootstrapping data with richer model</h3>
+<hr />
+
+@*<div ng-app ng-init='vm = {
+    message: "Inline message",
+    foods: [{name: "fish", rating: 1, notes: "my favorite"}]
+}'>*@
+
+<!--
+    ng-init is for demos only!
+    the 'vm' is not visible to other controllers
+-->
+<div ng-app ng-init='vm = @Html.Raw(Model)'>
+
+    <h4>{{vm.message}}</h4>
+
+    <!-- Twitter Bootstrap styling -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10">
+
+                <table class="table table-condensed table-hover">
+                    <tr>
+                        <th>#</th>
+                        <th>Name </th>
+                        <th>Rating </th>
+                        <th>Notes </th>
+                        <th>Link</th>
+                    </tr>
+                    <tr ng-repeat="food in vm.foods">
+                        <td>{{$index+1}}</td>
+                        <td ><input ng-model="food.name"/> is {{food.name+" ha ha"}}</td>
+                        <td>{{food.rating}}</td>
+                        <td>{{food.notes}}</td>
+                        <td><a href="" ng-href="food{{$index}}">{{food.name}}</a></td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts
+{
+    <script src="~/Scripts/angular.min.js"></script>
+}
+
+<!-- ORIGINAL
+
+                <table class="table table-condensed table-hover">
+                    <tr>
+                        <th>#</th>
+                        <th>Name </th>
+                        <th>Rating </th>
+                        <th>Notes </th>
+                    </tr>
+                    <tr ng-repeat="food in vm.foods">
+                        <td>{{$index+1}}</td>
+                        <td><input ng-model="food.name"/> is {{food.name}}</td>
+                        <td>{{food.rating}}</td>
+                        <td>{{food.notes}}</td>
+                    </tr>
+                </table>
+    
+
+    -->

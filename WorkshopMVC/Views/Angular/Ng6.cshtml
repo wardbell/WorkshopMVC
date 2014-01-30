@@ -1,0 +1,32 @@
+﻿@model string
+@{
+    ViewBag.Title = "Ng Sample #6";
+}
+
+<h2>Angular Sample #6</h2>
+<h3>Async data from MVC controller</h3>
+<hr />
+
+<div ng-app="app">
+    <div ng-include="'/app/shell.html'"></div>
+</div>
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/angular")
+
+    <script src="~/common/common.module.js"></script>
+    <script src="~/common/common.errorPanel.js"></script>
+    <script src="~/common/common.errorService.js"></script>
+
+    <script src="~/app/app.js"></script>
+    <script src="~/app/config.js"></script>
+    <script src="~/app/shell.js"></script>
+
+    <script src="~/app/ng6/datacontext.js"></script>  
+    <script src="~/app/ng6/food.js"></script>
+    <script src="~/app/ng6/food$scope.js"></script>
+    <script src="~/app/ng6/message.js"></script>
+}
+
+

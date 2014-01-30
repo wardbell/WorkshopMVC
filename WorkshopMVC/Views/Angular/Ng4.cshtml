@@ -1,0 +1,77 @@
+﻿@model string
+@{
+    ViewBag.Title = "Ng Sample #4";
+}
+
+<h2>Angular Sample #4</h2>
+<h3>Bootstrapping data with ngController</h3>
+<hr />
+<!-- 
+    Notice ng-app="app" and ng-controller
+    They're defined in script at the bottom 
+-->
+<div ng-app="app" ng-controller='foodController as vm'>
+
+    <h4>{{vm.message}}</h4>
+
+    <!-- Twitter Bootstrap styling -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10">
+
+                <table class="table table-condensed table-hover">
+                    <tr>
+                        <th>#</th>
+                        <th>Name </th>
+                        <th>Rating </th>
+                        <th>Notes </th>
+                    </tr>
+                    <tr ng-repeat="food in vm.foods">
+                        <td>{{$index+1}}</td>
+                        <td>{{food.name}}</td>
+                        <td>{{food.rating}}</td>
+                        <td>{{food.notes}}</td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="~/Scripts/angular.min.js"></script>    
+
+    <script>        
+        /* Create an application with a controller */
+
+        // Define the application module, 'app'
+        angular.module('app', [])
+            // add a controller for this page, injecting the 'datacontext'
+            .controller('foodController', ['datacontext', function(datacontext) {
+
+                var vm = datacontext.bootstrapData;
+                return vm;
+
+                // Or you can break it out like this
+                //this.message = vm.message;
+                //this.foods = vm.foods;
+            }]);
+
+        // Add a service to get data for the application
+        // HAVE TO EMBED THIS SCRIPT IN THE RAZOR PAGE
+        // THIS ONLY WORKS BECAUSE RAZOR CAN INJECT THE BOOTSTRAP MODEL!
+        angular.module('app').factory('datacontext', function() {
+            var data = @Html.Raw(Model); // Still silly but indulge me
+            console.log(data);
+
+            return {
+                bootstrapData: data
+            };
+        });
+
+    </script>
+}
+
+

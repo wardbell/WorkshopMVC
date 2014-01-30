@@ -1,0 +1,13 @@
+﻿<div ng-controller="common.errorPanel as vm">
+    <div class="panel panel-danger" ng-if="vm.hasMessages()">
+        <div class="panel-heading">
+            <span class="glyphicon glyphicon-warning-sign"></span>&nbsp;<strong>Errors</strong>
+            <a style="float: right;"  class="btn btn-primary btn-xs" role="button"
+            ng-click="vm.clearMessages()">Clear</a>
+        </div>
+        <div class="panel-body">
+            <p ng-repeat="msg in vm.getMessages()">{{msg}}</p>
+        </div>
+    </div>
+</div>
+

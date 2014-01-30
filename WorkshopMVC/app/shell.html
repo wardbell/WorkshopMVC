@@ -1,0 +1,22 @@
+﻿<div ng-app="app" ng-controller="shell as vm">
+
+    <!-- Navigation: buttons and links-->
+    <ul class="nav nav-pills">
+        <li ng-class="{active: vm.isMessageActive}">
+            <a ng-click="vm.showMessage()">Message</a>
+        </li>
+        <li ng-class="{active: vm.isFoodActive}">
+            <a ng-click="vm.showFood()">Food</a>
+        </li>
+        <li ng-class="{active: vm.isFoodScopeActive}">
+            <a ng-click="vm.showFood$Scope()">Food$Scope</a>
+        </li>
+    </ul>
+    <a ng-click="vm.addTestError()" style="float: right;">add error</a>
+
+    <!-- Content -->
+    <div ng-include="vm.selectedView"></div>
+    
+    <!-- Shell error panel -->
+    <div ng-include="vm.errorPanel"></div>
+</div>

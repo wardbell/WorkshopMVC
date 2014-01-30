@@ -1,0 +1,808 @@
+<!-- LAYOUT 1 -->
+@*<div id="bodyalignleft">*@
+ 
+ <div id="centercontent">
+ @*data-bind="visible: (PickerVisible() == false)"*@
+     <div id="reports" >
+    
+      
+       
+         <h2> @ViewBag.Title</h2>     
+     <div class = "buttons" >
+        
+        <button type="button" style="width:100px" class="positive" onclick="WizardPrevious()" data-bind="enable: WizardTab()>0">
+                         <img src="../../Content/images/removeFilteringBtn.png"  alt=""/> 
+                        Previous
+                        </button>  
+                        <button type="button" style="width:100px" class="positive" onclick="WizardNext()" data-bind="enable: WizardTab()<5">Next
+                         <img src="../../Content/images/addFilteringBtn.png"  alt=""/> 
+                        
+                        </button>  
+    </div>
+     
+    
+      
+         <br />  
+   
+    @{Html.BeginForm("Edit", "ReportMarketShare", FormMethod.Post, new { id = "TheForm" }); }
+
+         <div id = "ViewHIPAADialog" > 
+                    <p id="contentholder2">Nothing</p>
+             </div>
+@{ Html.Telerik().TabStrip()
+       .Name("TabStrip")
+       .Items(tabstrip =>
+       {
+           tabstrip.Add()
+               .Text("1. Report Type or Unit")
+               //.ImageUrl("../../Content/images/ajax.png") 
+               .HtmlAttributes(new {onclick = "onTabClick()"})
+               .Content(@<text>                    
+               <fieldset>
+           
+    <legend style="text-align:left">Report Type or Unit</legend>
+    <div>Report Name:&nbsp<span><input data-bind="style: { width: '500px'},value: Description" /></span></div>
+    <br />
+    <div >Entity:&nbsp<span>@Html.DropDownListFor(model => model.UnitId, (IEnumerable<SelectListItem>)ViewBag.UnitList, new { @data_bind = "enable:false, value: UnitId" })</span></div>
+    <br />
+    <div >Report Type:&nbsp<span>@Html.DropDownListFor(model => model.ReportTypesId, (IEnumerable<SelectListItem>)ViewBag.TypeList, new { @data_bind = "enable:false,value: ReportTypesId ,click: function() { SetReportTypeDefaults();SetTrendingValue(); }" })</span></div>
+    <br />
+    <div>Patient Type:&nbsp<select data-bind="enable:false,style: { width: '200px'},options: PatientTypeList, optionsText: 'Name',optionsValue: 'Value', value: DataType1"></select></div>
+    
+     
+          
+         @*data-bind="visible: !IsTemplateReport()"*@
+     </fieldset>             
+               </text>);
+               
+tabstrip.Add()
+    .Text("2. Select Date Range and Trend Type")
+    .HtmlAttributes(new {onclick = "onTabClick()"})
+    //.ImageUrl("../../Content/images/ajax.png")
+    .Content(@<text>                    
+<fieldset>
+<legend style="text-align:left">Select Date Range</legend>
+        
+        <div>Data Range:&nbsp<select data-bind="style: { width: '200px'},options: DateTypeList, optionsText: 'Name',optionsValue: 'Value', value: DateCalculationType"></select>&nbsp<span>Start Date:&nbsp</span><select data-bind="style: { width: '150px'},enable: DateCalculationType() == 'E', options: DateList,optionsText: 'Description',optionsValue:'YearMonth', value: StartYearMonth"></select>&nbsp<span>End Date:&nbsp</span><select data-bind="style: { width: '150px'},enable: DateCalculationType() == 'E', options: DateList,optionsText: 'Description',optionsValue:'YearMonth', value: EndYearMonth"></select>&nbsp<span data-bind="style: { color: 'red'}, text: InvalidDate()"></span></div>
+        <div data-bind="visible:DateCalculationType() != 'E'">Period Type:&nbsp<select data-bind="style: { width: '200px'},visible:DateCalculationType() != 'E',options: PeriodTypeList, optionsText: 'Name',optionsValue: 'Value', value: DatePeriodType"></select></div>
+       <div data-bind="visible:DateCalculationType() != 'E'">Time Periods:&nbsp<input id="DatePeriods"   onchange="DirtyDate = false" data-bind="style: { width: '80px'},visible:DateCalculationType() != 'E',value: DatePeriods" /><span data-bind="style: { color: 'red'}, text: DateErrorMessage()">
+       </span> Please enter whole number only.</div>
+         </fieldset>
+         <div  data-bind="visible:TrendOn() == 'On'">
+     <fieldset>
+         <legend style="text-align:left">Trend Type</legend>
+             
+         <div data-bind="text: TrendDescription(),visible:Trending() != '0'"></div>
+             
+         <div>Trend Period:&nbsp<select data-bind="style: { width: '180px'},options: TrendPeriod, optionsText: 'Name',optionsValue: 'Value', value: TrendOnPeriod,click: function() { SetTrendingValue() }"></select></div>
+             
+         <div>Trend Sort:&nbsp<select data-bind="style: { width: '300px'},options: TrendSort, optionsText: 'Name',optionsValue: 'Value', value: TrendOnSort,click: function() { SetTrendingValue() }"></select>
+              
+          <span data-bind="visible:false"><input type="radio" value="C" data-bind="checked: YearType" />Calendar Year</span>             
+        <span data-bind="visible:false"><input type="radio" value="F" data-bind="checked: YearType" />Fiscal Year</span>
+             </div>
+            
+             
+            
+             
+       </fieldset>
+       </div>
+    </text>);
+tabstrip.Add()
+    .Text("3. Define Target Market")
+    .HtmlAttributes(new {onclick = "onTabClick()"})
+    //.ImageUrl("../../Content/images/ajax.png")
+    .Content(@<text>
+<fieldset>
+<legend style="text-align:left">Define Target Market</legend>
+    
+             
+   
+       @*<div><button data-bind="click: function() { reportViewModel.GetField1Sorts() }">Get field 1 sorts</button><button data-bind="click: function() { reportViewModel.GetField2Sorts() }">Get field 2 sorts</button><button data-bind="click: function() { reportViewModel.GetField3Sorts() }">Get field 3 sorts</button></div>*@
+            
+            
+        @*<hr /><h2>Debug</h2><div data-bind="text: ko.toJSON(reportViewModel)">*@
+        @* <Start of geographic filter stuff> *@
+        <div>
+            
+        <span>Advanced Filter Mode (use OR statements) &nbsp<input type="checkbox" data-bind="checked: ShowAdvancedFilter" />
+        </span>
+        </div>
+        <div><h3 id="filterheader">Geographic Filter</h3>
+            
+        </div>
+        <div>
+        <span>Apply Default Service Area Filter when this report is run or scheduled: &nbsp<input type="checkbox" data-bind="checked: IsTemplateReport" /></span>
+        <span data-bind="visible: IsHost() == true && IsTemplateReport">&nbsp &nbsp Define this report as a global share: &nbsp<input type="checkbox" data-bind="checked: IsGlobalShare" /></span>
+            
+           
+        </div>
+        <div data-bind="visible: IsTemplateReport()"><span data-bind="style: { color: 'red'}">The default geographic filter will be applied when this report is run.</span></div>
+        <div data-bind="visible: !IsTemplateReport()">
+     
+                 
+       <div data-bind="visible: !IsTemplateReport()">Saved Geographic Filters: &nbsp
+       <select data-bind="style: { width: '400px'},options: GeographicFilterList, optionsText: 'Description',optionsValue: 'Id', value: FilterIdGeographic, optionsCaption: 'Do not apply a saved filter'"></select>
+       <span data-bind="visible: FilterIdGeographic"><button class="t-button t-state-default" type="submit" value ="ApplyGeographicFilter" name = "submitButton" data-bind="click:function(){reportViewModel.ActionMethod('ApplyGeographicFilter'); return true;}">Apply Filter</button></span>
+</div>
+   
+    
+    
+      <div>
+        <span class="buttons" style="float:none">
+        <button data-bind="click: function() { reportViewModel.addLineGeographic() }">
+        <img src="../../Content/images/addBtn.png"  alt=""/>
+        Add Filter Detail
+        </button>
+                  
+        </span>
+            
+       <span data-bind="style: { color: 'red'}, text: ParenthesisMessageGeographic()">
+       </span>
+       </div>
+     
+<br />
+<table class="tableb">
+<thead>
+    <tr>
+<th width="30px"data-bind="visible: reportViewModel.ShowAdvancedFilter">Move</th>
+<th width="30px"></th>
+<th width="85px" data-bind="visible: reportViewModel.ShowAdvancedFilter">And/Or</th>
+<th width="35px" data-bind="visible: reportViewModel.ShowAdvancedFilter">(</th>
+<th width="205px">Field</th>
+<th width="162px" >Operator</th>
+<th width="300px">Value</th>
+<th width="30px" data-bind="visible: reportViewModel.ShowAdvancedFilter">)</th>
+</tr>
+</thead>
+<tbody data-bind='template: {name: "filterRowTemplateGeographic", foreach: MarketShareLiveFilterGeographicDetailsList}'></tbody>
+</table>
+     
+            <br />  @*no effect*@
+ <div data-bind="visible: reportViewModel.MarketShareLiveFilterGeographicDetailsList().length > 0, style: {textAlign:'center', marginBottom:'5px'}">
+            @*no effect*@
+<span class="buttons">
+     <button  data-bind="click:function(){reportViewModel.ActionMethod('ValidateGeographicFilter'); return true;}, style: {marginBottom:'5px'}">  <img src="../../Content/images/validateBtn.png"  alt=""/>Validate Filters</button><br />
+    
+    &nbsp Save Geographic Filter as: <input data-bind="style: { width: '400px'},value: NewGeographicFilterName, valueUpdate: 'afterkeydown'" /> 
+     </span>
+     <span class="buttons">
+     
+     <button class="positive" type="submit"  value ="SaveFilter" name = "submitButton" data-bind="enable:NewGeographicFilterName(), click:function(){reportViewModel.ActionMethod('SaveGeographicFilter'); return true;} " >  <img src="../../Content/images/saveBtn.png"  alt=""/> Save Filter</button>
+        </span>
+        
+         <div>
+         <span data-bind="style: { color: 'red'}, text: GeographicFilterMessage()"></span></div>
+        </div>
+     </div>
+       @* <Start of case filter stuff> *@
+   
+            <div>
+     
+            <h3 id="filterheader">Case Filter</h3>     
+           
+           
+            <div>Saved Case Filters: &nbsp<select data-bind="style: { width: '400px'},options: CaseFilterList, optionsText: 'Description',optionsValue: 'Id', value: FilterIdCase, optionsCaption: 'Do not apply a saved filter'"></select>&nbsp 
+    <span data-bind="visible: FilterIdCase"><button class="t-button t-state-default" type="submit" value ="ApplyCaseFilter" name = "submitButton" data-bind="click:function(){reportViewModel.ActionMethod('ApplyCaseFilter'); return true;}">Apply Filter</button></span>
+  
+    </div>
+    <div>
+            <span class="buttons" style="float:none">
+            <button data-bind="click: function() { reportViewModel.addLine() }">
+            <img src="../../Content/images/addBtn.png"  alt=""/>
+            Add Filter Detail
+            </button>
+                 
+            </span>
+       
+           <span data-bind="style: { color: 'red'}, text: ParenthesisMessage()">
+           </span>
+           </div>
+         
+     <br />       
+    <table class="tableb">
+    <thead>
+        <tr>
+    <th width="30px"data-bind="visible: reportViewModel.ShowAdvancedFilter">Move</th>
+    <th width="30px"></th>
+    <th width="85px" data-bind="visible: reportViewModel.ShowAdvancedFilter">And/Or</th>
+    <th width="35px" data-bind="visible: reportViewModel.ShowAdvancedFilter">(</th>
+    <th width="205px">Field</th>
+    <th width="167px" >Operator</th>
+    <th width="300px">Value</th>
+    <th width="30px" data-bind="visible: reportViewModel.ShowAdvancedFilter">)</th>
+    </tr>
+    </thead>
+    <tbody data-bind='template: {name: "filterRowTemplate", foreach: MarketShareLiveFilterDetailsList}'></tbody>
+    </table>
+     <br />  
+     <div data-bind="visible: reportViewModel.MarketShareLiveFilterDetailsList().length > 0, style: {textAlign: 'center'}">
+         <span class="buttons">
+     <button data-bind="click:function(){reportViewModel.ActionMethod('ValidateCaseFilter'); return true;}, style:{marginBottom:'5px'}">  <img src="../../Content/images/validateBtn.png"  alt=""/>Validate Filters</button><br />
+             
+             &nbsp Save Case Filter as: <input data-bind="style: { width: '400px'},value: NewFilterName, valueUpdate: 'afterkeydown'" /> 
+     </span>
+     <span class="buttons">
+     <button class="positive" type="submit"  value ="SaveFilter" name = "submitButton" data-bind="enable:NewFilterName(), click:function(){reportViewModel.ActionMethod('SaveFilter'); return true;} " >  <img src="../../Content/images/saveBtn.png"  alt=""/> Save Filter</button>
+     
+     @* <button class="t-button t-state-default" type="submit" value ="SaveGeographicFilter" name = "submitButton" data-bind="click:function(){reportViewModel.ActionMethod('SaveGeographicFilter'); return true;}">Save Geographic Filter</button>*@
+     
+        </span>
+         <div>
+         <span data-bind="style: { color: 'red'}, text: CaseFilterMessage()"></span></div>
+     @*<span data-bind="visible: NewFilterName ">
+    
+     
+     
+        </span>*@
+     </div>
+     
+       </div>
+    
+    
+ </fieldset>
+        </text>);
+tabstrip.Add()
+    .Text("4. Report Designer")
+    .HtmlAttributes(new {onclick = "onTabClick()"})
+    //.ImageUrl("../../Content/images/ajax.png")
+    .Content(@<text>                    
+<fieldset>
+<legend style="text-align:left">Report Designer</legend>
+
+<div id="divSelectColumns" data-bind="visible: SelectColumnsVisible">        
+<table class="tableb" id="ShowSection">
+   <thead>
+       <tr>
+   <th data-bind="style: { width: '100px'}"></th>
+       <th data-bind="visible:reportViewModel.MarketLevel() > 0,style: { width: '80px'}"><span >Field Value (Level 1)</span></th>
+   <th data-bind="visible:reportViewModel.MarketLevel() > 0,style: { width: '80px'}"><span >Field Description (Level 1)</span></th>
+       <th data-bind="visible:reportViewModel.MarketLevel() > 1,style: { width: '80px'}"><span >Field Value (Level 2)</span></th>
+       <th data-bind="visible:reportViewModel.MarketLevel() > 1,style: { width: '80px'}"><span >Field Description (Level 2)</span></th>
+       <th data-bind="visible:reportViewModel.MarketLevel() > 2,style: { width: '80px'}"><span >Field Value (Level 3)</span></th>
+       <th data-bind="visible:reportViewModel.MarketLevel() > 2,style: { width: '80px'}"><span >Field Description (Level 3)</span></th>
+        
+   <th data-bind="style: { width: '80px'}"><span data-bind="text: Column1Text"></span></th>
+   <th data-bind="visible:!(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND'),style: { width: '80px'}"><span data-bind="text: Column2Text"></span></th>
+   <th data-bind="visible:!(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND'),style: { width: '80px'}"><span data-bind="text: Column3Text"></span></th>
+   <th data-bind="visible:reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND' ,style: { width: '80px'}"><span data-bind="text: Column4Text"></span></th>
+   <th data-bind="visible:!(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND'),style: { width: '80px'}"><span data-bind="text: Column5Text"></span></th>
+   <th data-bind="visible:!(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND'),style: { width: '80px'}"><span data-bind="text: Column6Text"></span></th>
+   <th data-bind="style: { width: '80px'}"><span data-bind="text: Column7Text"></span></th>
+       <th data-bind="visible:reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND',style: { width: '80px'}"><span data-bind="text: Column8Text"></span></th>
+   </tr>
+    
+   </thead>
+   <tr>
+   <td data-bind="style: { width: '100px'}">Show Data ...</td>
+       <td data-bind="visible:reportViewModel.MarketLevel() > 0,style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowField1" /></td>
+   <td data-bind="visible:reportViewModel.MarketLevel() > 0,style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowField1Description" /></td>
+   <td data-bind="visible:reportViewModel.MarketLevel() > 1,style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowField2" /></td>
+       <td data-bind="visible:reportViewModel.MarketLevel() > 1,style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowField2Description" /></td>
+   <td data-bind="visible:reportViewModel.MarketLevel() > 2,style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowField3" /></td>
+          <td data-bind="visible:reportViewModel.MarketLevel() > 2,style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowField3Description" /></td>
+    
+   <td data-bind="style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowDischargesHospital" /></td>
+   <td data-bind="visible:!(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND'),style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowDischargesState" /></td>
+   <td data-bind="visible:!(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND'),style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowDischargesPercent" /></td>
+   <td data-bind="visible:reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND' ,style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowHospitalPercent" /></td>
+   <td data-bind="visible:!(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND'),style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowLOSHospital" /></td>
+   <td data-bind="visible:!(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND'),style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowLOSState" /></td>
+   <td data-bind="style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowLOSPercent" /></td>
+       <td data-bind="visible:reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND',style: { width: '80px'}"><input type="checkbox" data-bind="checked: ShowLOSHospitalPercent" /></td>
+    
+   </tr>
+   </table>
+   </div> 
+       <table id="Trending">
+     <thead>
+   <tr>
+   <th class="td" data-bind="style: { width: '280px'}"><span data-bind="style: { color: 'red'}, text: ValidateReportMessage()"></span></th>
+     
+    <th class="td" data-bind="visible:Trending() != '0',style: { width: '650px'}"><span data-bind="text: TrendDescription()"></span></th>
+   </tr>
+   </thead>
+   </table>
+   @*<table class="tableb">
+   <tr>
+   <td>  *@
+   <table >
+   <thead>
+       <tr>
+   <th class="rbw" data-bind="style: { width: '280px'}">Levels:&nbsp<select data-bind="style: { width: '200px'},options: LevelList, optionsText: 'Name',optionsValue: 'Value', value: MarketLevel"></select></th>
+   <th class="td" data-bind="style: { width: '60px'}">&nbsp</th>
+       <th class="td" data-bind="style: { width: '130px'}"><a href="#" data-bind="click: function(){reportViewModel.SelectColumns()}">Select Visible columns</a></th>
+    
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesHospital">&nbsp</th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')">&nbsp</th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesPercent() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')">&nbsp</th>
+       <th class="td" data-bind="style: { width: '65px'},visible:ShowHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')">&nbsp</th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSHospital() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')">&nbsp</th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')">&nbsp</th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSPercent">&nbsp</th>
+       <th class="td" data-bind="style: { width: '65px'},visible:ShowLOSHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')">&nbsp</th>
+   <th class="lbw" data-bind="style: { width: '100px'}">&nbsp</th>
+   </tr>
+   </thead>
+   </table>    
+              <table >
+   <thead>
+       <tr>
+   <th class="rb" data-bind="style: { width: '280px'}">Field</th>
+        <th data-bind="style: { width: '60px'}"><span >Field Value</span></th>
+   <th data-bind="style: { width: '130px'}"><span >Field Description</span></th>
+   
+   <th data-bind="style: { width: '60px'},visible:ShowDischargesHospital"><span data-bind="text: Column1Text"></span></th>
+   <th data-bind="style: { width: '60px'},visible:ShowDischargesState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span data-bind="text: Column2Text"></span></th>
+   <th data-bind="style: { width: '60px'},visible:ShowDischargesPercent() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span data-bind="text: Column3Text"></span></th>
+       <th data-bind="style: { width: '65px'},visible:ShowHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span data-bind="text: Column4Text"></span></th>
+   <th data-bind="style: { width: '60px'},visible:ShowLOSHospital() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span data-bind="text: Column5Text"></span></th>
+   <th data-bind="style: { width: '60px'},visible:ShowLOSState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span data-bind="text: Column6Text"></span></th>
+   <th data-bind="style: { width: '60px'},visible:ShowLOSPercent"><span data-bind="text: Column7Text"></span></th>
+       <th data-bind="style: { width: '65px'},visible:ShowLOSHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span data-bind="text: Column8Text"></span></th>
+   <th class="lb" data-bind="style: { width: '100px'}">Records</th>
+   </tr>
+   </thead>
+   </table>
+    
+   
+    <table id="Field1" class="sortable" data-bind="visible: (MarketLevel())">
+     <thead>
+   <tr>
+   <th class="rbw sorttable_nosort" data-bind="style: { width: '280px'}"><select data-bind="style: { width: '240px'}, options: DictionaryList,optionsText: 'FieldLabel',optionsValue:'Id', optionsCaption: 'Choose ...',value: Field1"></select></th>
+   <th class="td" data-bind="style: { width: '60px'}"><span class=uline data-bind="visible:ShowField1">XX</span></th>
+         <th class="td" data-bind="style: { width: '130px'}"><span class=uline data-bind="visible:ShowField1Description()">Description</span></th>
+    
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesHospital"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesPercent() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span class=uline>9%</span></th>
+         <th class="td" data-bind="style: { width: '65px'},visible:ShowHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>9%</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSHospital() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSPercent"><span class=uline>9%</span></th>
+         <th class="td" data-bind="style: { width: '65px'},visible:ShowLOSHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>9%</span></th>
+   <th class="lbw sorttable_nosort" data-bind="style: { width: '100px'}"><select data-bind="style: { width: '90px'},options: RecordsList, optionsText: 'Name',optionsValue: 'Value', value: Field1Records"></select></th>
+   </tr>
+   </thead>
+   </table>
+    
+    <table id="Field2" class="sortable" data-bind="visible: (MarketLevel() > 1)">
+     <thead>
+   <tr>
+   <th class="rbw sorttable_nosort" data-bind="style: { width: '280px'}">&nbsp &nbsp<select data-bind="style: { width: '240px'}, options: DictionaryList,optionsText: 'FieldLabel',optionsValue:'Id', optionsCaption: 'Choose ...',value: Field2"></select></th>
+   <th class="td" data-bind="style: { width: '60px'}"><span class=uline data-bind="visible:ShowField2">XX</span></th>
+         <th class="td" data-bind="style: { width: '130px'}">&nbsp &nbsp<span class=uline data-bind="visible:ShowField2Description">Description</span></th>
+    
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesHospital"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesPercent() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span class=uline>9%</span></th>
+         <th class="td" data-bind="style: { width: '65px'},visible:ShowHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>9%</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSHospital() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSPercent"><span class=uline>9%</span></th>
+         <th class="td" data-bind="style: { width: '65px'},visible:ShowLOSHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>9%</span></th>
+   <th class="lbw sorttable_nosort" data-bind="style: { width: '100px'}"><select data-bind="style: { width: '90px'},options: RecordsList, optionsText: 'Name',optionsValue: 'Value', value: Field2Records"></select></th>
+   </tr>
+   </thead>
+   </table>
+
+   
+   <table id="Field3" class="sortable" data-bind="visible: (MarketLevel() > 2)">
+     <thead>
+   <tr>
+   <th class="rbw sorttable_nosort" data-bind="style: { width: '280px'}">&nbsp &nbsp &nbsp &nbsp<select data-bind="style: { width: '240px'}, options: DictionaryList,optionsText: 'FieldLabel',optionsValue:'Id', optionsCaption: 'Choose ...',value: Field3"></select></th>
+   <th class="td" data-bind="style: { width: '60px'}"><span class=uline data-bind="visible:ShowField3">XX</span></th>
+         <th class="td" data-bind="style: { width: '130px'}">&nbsp &nbsp &nbsp &nbsp<span class=uline data-bind="visible:ShowField3Description">Description</span></th>
+    
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesHospital"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesState() &&!(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowDischargesPercent() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span class=uline>9%</span></th>
+         <th class="td" data-bind="style: { width: '65px'},visible:ShowHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>9%</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSHospital() && !(reportViewModel.ReportDriver() == 'MKTREPLICATION') && !(reportViewModel.ReportDriver() == 'MKTREPLICATIONTREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSState() && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARE') && !(reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>99</span></th>
+   <th class="td" data-bind="style: { width: '60px'},visible:ShowLOSPercent"><span class=uline>9%</span></th>
+         <th class="td" data-bind="style: { width: '65px'},visible:ShowLOSHospitalPercent() && (reportViewModel.ReportDriver() == 'HOSPMKTSHARE' || reportViewModel.ReportDriver() == 'HOSPMKTSHARETREND')"><span class=uline>9%</span></th>
+   <th class="lbw sorttable_nosort" data-bind="style: { width: '100px'}"><select data-bind="style: { width: '90px'},options: RecordsList, optionsText: 'Name',optionsValue: 'Value', value: Field3Records"></select></th>
+   </tr>
+   </thead>
+   </table>
+  @*</td>
+   </tr>
+   
+
+    
+  </table>*@
+             
+</fieldset>   
+       </text>);
+tabstrip.Add()
+           .Text("5. Select Output and Run Report")
+           .HtmlAttributes(new {onclick = "onTabClick()"})
+
+           .Content(@<text>                    
+       
+<fieldset>
+  
+<legend style="text-align:left">Select Output</legend>
+     <br />
+          <div>Report Name: &nbsp <span><input onchange="onTabClick()" data-bind="style: { width: '500px'},value: Description" /> </span></div>
+       <br />
+   
+       
+<div >
+ 
+       <div> Output Type:&nbsp<select onchange="onTabClick()" data-bind="style: { width: '200px'},options: OutputTypeList, optionsText: 'Name',optionsValue: 'Value', value: OutputType "></select></div>
+       <br />
+       <div><span data-bind="style: { color: 'red'}, text: ValidateReportMessage()"></span></div>
+       <div><span class = "buttons" ><button class="positive" type="submit" value ="Validate" name = "submitButton" data-bind="enable: !QueryMessage() || InvalidReport(), click:function(){reportViewModel.ActionMethod('Run'); return true;}"><img src="../../Content/images/Validate.png"  alt=""/>Validate Report</button></span>
+           &nbsp &nbsp<span class = "buttons" ><button class="positive" type="submit"  value ="RunButton" name = "runButton" id="runButton" data-bind="enable: QueryMessage() && IsConnected() && !InvalidReport(), click:function(){reportViewModel.QueryMessage('');setmessage('');InvalidReport('');}"><img src="../../Content/images/runningMan.png"  alt=""/>Run Validated Report</button>
+               </span></div>
+ </div>
+ <div data-bind="visible: QueryMessage()">@Html.Raw(ViewBag.QueryMessage)</div>
+           
+ </fieldset>
+            
+           </text>);
+tabstrip.Add()
+           .Text("6. Save Report")
+           .HtmlAttributes(new {onclick = "onTabClick()"})
+           .Content(@<text>                    
+              
+<fieldset>
+  
+<legend style="text-align:left">Save Report</legend>
+<br />
+     
+   
+ @*
+      <div><button type="submit" value ="Save" name = "submitButton" >Save Report</button>&nbsp Save as: <span><input data-bind="style: { width: '350px'},value: Description" /> </span></div>
+       <div><button type="submit" value ="Run" name = "submitButton" >Run Report</button>&nbsp Output Type:&nbsp<select data-bind="style: { width: '200px'},options: OutputTypeList, optionsText: 'Name',optionsValue: 'Value', value: OutputType"></select></div>
+        <div><button type="submit" value ="Schedule" name = "submitButton" >Schedule Report</button></div>
+*@    
+<div class = "buttons" >
+           
+          <div> Save as: <span><input data-bind="style: { width: '500px'},value: Description" /> </span></div>
+          <br />
+          <div><button class="positive" type="submit"  value ="Save" name = "submitButton" data-bind="click:function(){reportViewModel.ActionMethod('Save'); return true;} " >  <img src="../../Content/images/saveBtn.png"  alt=""/> Save Report</button>
+          <button class="positive" type="submit" value ="SaveNew" name = "submitButton" data-bind="click:function(){reportViewModel.ActionMethod('SaveNew'); return true;} " >  <img src="../../Content/images/saveBtn.png"  alt=""/> Save as New Report</button></div>
+          @* <div><button class="positive" type="submit" value ="Schedule" name = "submitButton" data-bind="click:function(){reportViewModel.ActionMethod('Schedule'); return true;}" > <img src="../../Content/images/clock.png"  alt=""/> Schedule Report</button></div>*@
+   </div>
+     <div class="error" ><span>@ViewBag.SaveMessage</span></div>
+    <div data-bind="visible: QueryMessage()">@Html.Raw(ViewBag.QueryMessage)</div> 
+    </fieldset>
+            
+              </text>);
+}).SelectedIndex(0)
+.ClientEvents(events =>
+events.OnSelect("WizardSelect"))
+
+
+.HtmlAttributes(new { style = "width:1160px; " })
+.Render();} 
+
+
+ @*<div id="divSaveReport" data-bind="visible: SaveReportVisible">
+  <div> Save as: <span><input data-bind="style: { width: '350px'},value: Description" /> </span></div>
+  <div class = "buttons" >  
+                         
+                         <div><button class="positive" type="submit" value ="Save" name = "submitButton" data-bind="click: function(){document.TheForm.submit();  }" >  <img src="../../Content/images/saveBtn.png"  alt=""/> Save Report</button>
+           
+                        <button class="positive" style="width:200px;" data-bind="click: function(){reportViewModel.CloseSaveReport()}" > 
+                            <img src="../../Content/images/deleteBtn.png"  alt=""/> Cancel
+                        </button>
+                    
+                   </div>
+             </div>*@
+ 
+    @{Html.EndForm();}
+
+   @* <div>
+    @Html.ActionLink("Back to List", "Index")
+    </div>*@
+    <div > 
+     <fieldset>
+         <legend style="text-align:left">Reports Submitted Today</legend>
+        @* Report Requests Submitted Today for <span>@ViewBag.UnitName</span>&nbsp&nbsp *@
+         
+         <div class="message-box clean" data-bind="visible: RequestMessage()">
+            <span class="error" data-bind="text: RequestMessage()"></span>
+        </div>
+               <div class="error" >Incomplete Reports:<span data-bind="text:IncompleteReportCount()"></span></div> 
+                   
+               
+         @(Html.Telerik().Grid<Mha.Ids.Data.ReportsSubmittedTodayList_Result>()
+.Name("GridViewResults")
+    .DataKeys(keys => keys.Add(o => o.ReportRunId))
+    .DataKeys(keys => keys.Add(o => o.ReportRunId))
+    .EnableCustomBinding(true)
+.Columns(columns =>
+{
+
+    columns.Bound(o => o.TimeStarted).Title("Date").Width(100).Format("{0:T}").Title("Submit Time");
+    columns.Bound(o => o.TimeEnded).Title("Date").Width(100).Format("{0:T}").Title("Finish Time");
+    columns.Bound(o => o.UnitName).Width(170).Title("Entity Name");
+            // columns.Bound(o => o.ModuleDescription).Width(100).Title("Module");
+
+    columns.Bound(o => o.ReportDescription).Width(280).Title("Report Name");
+            // columns.Bound(o => o.EstimatedTime).Width(80).Title("Estimated");
+    columns.Bound(o => o.executiontime).Width(120).Title("Time (seconds)");
+
+    columns.Bound(o => o.ReportStatus).Width(80).Title("Status");
+
+            // columns.Template(o => @Html.ActionLink("View Report", "View", new { reportRunId = o.ReportRunId })).Width(50);
+
+
+            // columns.Bound(c => c.ReportRunId).ClientTemplate("<# if (ReportStatus == 'Completed') {#>" + "<a href='" + Url.Action("View", "ReportViewer", new { reportRunId = "<#=ReportRunId#>" }) + " '>Open Report</a>  " + " <#}#>").Title("");
+            //  columns.Bound(c => c.ReportRunId).Filterable(false).ClientTemplate("<# if (ReportStatus == 'Completed' && OutputType == 'XLTemplate' && ReportDriverId.indexOf('2LEVEL') != -1 && '" + @ViewBag.BrowserType + "' == 'IE8' ) {#>" + "<a href='" + Url.Action("View", "ReportViewer", new { reportRunId = "<#=ReportRunId#>" }) + " '>Choose Save on the Prompt that Appears</a>  " + " <#} else if (ReportStatus == 'Completed'   ) {#>" + "<a href='" + Url.Action("View", "ReportViewer", new { reportRunId = "<#=ReportRunId#>" }) + " '> Open Report </a>  " + " <#} #>").Title("");
+    columns.Bound(c => c.ReportRunId).Filterable(false).ClientTemplate("<# if (isHipaaMining == true) {#>" + "<a href='javascript:' onclick=\"viewHipaa()\">HIPAA</a>" + " <#} else if (ReportStatus == 'Completed' && OutputType == 'XLTemplate' && ReportDriverId.indexOf('2LEVEL') != -1 && '" + @ViewBag.BrowserType + "' == 'IE8' ) {#>" + "<a href='" + Url.Action("View", "ReportViewer", new { reportRunId = "<#=ReportRunId#>" }) + " '>Choose Save on the Prompt that Appears</a>  " + " <#} else if (ReportStatus == 'Completed'   ) {#>" + "<a href='" + Url.Action("View", "ReportViewer", new { reportRunId = "<#=ReportRunId#>" }) + " '> Open Report </a>  " + " <#} #>").Title("");
+        })
+
+ .DataBinding(dataBinding => dataBinding.Ajax().Select("GetTodayReports", "ReportViewer"))
+
+                        .ClientEvents(e =>
+
+                            e.OnDataBinding("onDataBindingReports")
+
+                        )
+                            .ClientEvents(e =>
+                                
+
+                            e.OnRowDataBound("onRowDataBoundReports")
+                        )
+                            .ClientEvents(e =>
+                                
+
+                            e.OnDataBound("onDataBoundReports")
+                            .OnLoad("OnLoad")
+                        )
+.Scrollable((scroll) =>
+        {
+    scroll.Enabled(true).Height(120);
+        })
+.Sortable()
+.Selectable()
+.Pageable(pagerAction => pagerAction.PageSize(200))
+         .Filterable()
+ .HtmlAttributes(new { style = "width:1000px;" })
+
+) 
+
+
+     
+            
+  </fieldset>
+    </div>
+     <br /> 
+     <div class="buttons" >
+     <a href="@Url.Action("CancelEdit", "ReportMarketShare")">  
+        <img src="../../Content/images/backBtn.png"  alt=""/>  
+        Back  
+    </a>
+     </div>
+   
+    <div id="divSinglePicker" data-bind="visible: PickerSingleVisible">
+    <div><h3><span data-bind="text: FieldLabel()"></span></h3></div>
+    <table width="100%">
+            <tr>
+                <th width="100%"  align="center">  Single Value Picker</th>
+               
+            </tr>
+            <tr>
+                <td width="100%" valign="top" align="center">
+                 @(Html.Telerik().Grid<Mha.Ids.Data.DataDictionaryPicker_Result>()
+        .Name("SinglePickerGrid")
+        .TableHtmlAttributes(new { id = "SinglePickerTable" })
+        .DataKeys(dataKeys => dataKeys.Add(c => c.FieldValue))
+                .Columns(columns =>
+        {
+            // columns.Bound(o => o.FieldValue).ClientTemplate("<input type='checkbox' name='availableChecked' class='availableCheck' value='<#= FieldValue #>' />").Title("<input id='masterAvailablecheckbox' type='checkbox' />").Width(36).Filterable(false).HtmlAttributes(new { style = "text-align:center" });
+                    columns.Bound(o => o.FieldValue).Width(80).Title("Value").HtmlAttributes(new { style = "text-align:left" });
+                    columns.Bound(o => o.FieldName).Title("Description").HtmlAttributes(new { style = "text-align:left" });
+        })
+            //, onclick = "availableClicked()" 
+        .DataBinding(dataBinding => dataBinding.Ajax().Select("GetLookupValues", "Filter"))
+            //.ClientEvents(events => events.OnDataBinding("onDataBindingLeft"))
+                        .ClientEvents(e =>
+
+                            e.OnDataBinding("onDataBindingSingle")
+            //.OnLoad("onLoadSingle")
+            //.OnRowDataBound("onRowDataBoundSingle")
+                            .OnRowSelected("onRowSelectedSingle")
+                        )
+            // .RowAction(row => row.Selected = row.DataItem.FieldValue.Equals(reportViewModel.SelectedSingleValue()))
+                       .Selectable()
+        .Filterable()
+                .Pageable(settings => settings.PageSize(500))
+                .Scrollable(scrolling => scrolling.Height(300))
+        .HtmlAttributes(new { style = "width:400px;" })
+            // .Selectable()
+        )
+                </td>
+                
+                
+            </tr>
+            <tr>
+                
+                <td width="40%" valign="top" align="center">
+                    
+                  @*  <div><button style="width:200px;" data-bind="click: function(){reportViewModel.SavePicker()}">Apply Selections</button></div>
+                    <div><button style="width:200px;" data-bind="click: function(){reportViewModel.ClosePicker()}">Cancel Selections</button></div>
+    *@
+                     <div class = "buttons" >  
+                        
+
+                        <button class="positive" style="width:200px;border-collapse:separate" data-bind="click: function(){reportViewModel.CloseSinglePicker()}" > 
+                            <img src="../../Content/images/deleteBtn.png"  alt=""/> Cancel
+                        </button>
+                    
+                   </div>
+                </td>
+                
+            </tr>
+            
+        </table>
+        
+       
+    </div> 
+    
+   
+
+   
+    <div id="divPicker" data-bind="visible: PickerVisible">
+    <div><h3><span data-bind="text: FieldLabel()"></span></h3></div>
+    <table width="100%">
+            <tr>
+                <th width="40%"  align="center">  Available</th>
+                <th width="20%"  align="center">&nbsp;</th>
+                <th width="40%"  align="center">  Requested</th>
+            </tr>
+            <tr>
+                <td width="40%" valign="top" align="center">
+                 @(Html.Telerik().Grid<Mha.Ids.Data.DataDictionaryPicker_Result>()
+        .Name("AvailableGrid")
+        .TableHtmlAttributes(new { id = "AvailableTable" })
+        .DataKeys(dataKeys => dataKeys.Add(c => c.FieldValue))
+                .Columns(columns =>
+        {
+                    columns.Bound(o => o.FieldValue).ClientTemplate("<input type='checkbox' name='availableChecked' class='availableCheck' value='<#= FieldValue #>' />").Title("<input id='masterAvailablecheckbox' type='checkbox' />").Width(36).Filterable(false).HtmlAttributes(new { style = "text-align:center" });
+                    columns.Bound(o => o.FieldValue).Width(80).Title("Value").HtmlAttributes(new { style = "text-align:left" });
+                    columns.Bound(o => o.FieldName).Title("Description").HtmlAttributes(new { style = "text-align:left" });
+        })
+            //, onclick = "availableClicked()" 
+        .DataBinding(dataBinding => dataBinding.Ajax().Select("GetLookupValues", "Filter"))
+            //.ClientEvents(events => events.OnDataBinding("onDataBindingLeft"))
+                        .ClientEvents(e =>
+
+                            e.OnDataBinding("onDataBindingLeft")
+                            .OnLoad("onLoadLeft")
+                            .OnRowDataBound("onRowDataBoundLeft")
+
+                        )
+        .Filterable()
+                .Pageable(settings => settings.PageSize(500))
+                .Scrollable(scrolling => scrolling.Height(300))
+        .HtmlAttributes(new { style = "width:400px;" })
+            // .Selectable()
+        )
+                </td>
+                <td width="20%" valign="top" align="center">
+                    @*<div><input type="submit" name="add" style="width:200px;" value=">>" data-bind="click: reportViewModel.addRequested, enable:reportViewModel.SelectedLeftValues().length > 0" /></div>
+                    <div><input type="submit" name="remove" style="width:200px;" value="<<" data-bind="click: reportViewModel.removeRequested, enable:reportViewModel.SelectedRightValues().length > 0" /></div>
+                    *@
+                     <div class = "buttons" >
+                     <button class= "positive" type="submit" name="add"  style="width:200px; border-collapse:separate"   data-bind="click: reportViewModel.addRequested, enable:reportViewModel.SelectedLeftValues().length > 0" >
+                      Add <img src="../../Content/images/addFilteringBtn.png"  alt=""/> 
+                     </button>  
+ 
+                     <br />
+                     <button class= "positive" type="submit" name="remove" style="width:200px;border-collapse:separate" data-bind="click: reportViewModel.removeRequested, enable:reportViewModel.SelectedRightValues().length > 0"  >
+                            <img src="../../Content/images/removeFilteringBtn.png"  alt=""/> Remove
+                     </button> 
+                    </div>
+    
+                </td>
+                <td width="40%" valign="top" align="center">
+                @(Html.Telerik().Grid<Mha.Ids.Data.DataDictionaryPicker_Result>()
+        .Name("SelectedGrid")
+        .TableHtmlAttributes(new { id = "SelectedTable" })
+        .DataKeys(dataKeys => dataKeys.Add(c => c.FieldValue))
+        .Columns(columns =>
+        {
+            columns.Bound(o => o.FieldValue).ClientTemplate("<input type='checkbox' name='selectedChecked' class='selectedCheck'  value='<#= FieldValue #>' />").Title("<input id='masterSelectedcheckbox' type='checkbox' />").Width(36).Filterable(false).HtmlAttributes(new { style = "text-align:center" });
+            columns.Bound(o => o.FieldValue).Width(80).Title("Value").HtmlAttributes(new { style = "text-align:left" });
+            columns.Bound(o => o.FieldName).Title("Description").HtmlAttributes(new { style = "text-align:left" });
+        })
+        .DataBinding(dataBinding => dataBinding.Ajax().Select("GetLookupValues", "Filter"))
+                .ClientEvents(e =>
+
+                                    e.OnDataBinding("onDataBindingRight")
+                                    .OnLoad("onLoadRight")
+                                    .OnRowDataBound("onRowDataBoundRight")
+
+                                )
+            //.Filterable()
+                        .Pageable(settings => settings.PageSize(500))
+                .Scrollable(scrolling => scrolling.Height(300))
+                        .HtmlAttributes(new { style = "width:400px;" })
+            // .Selectable()
+        )
+                    
+                </td>
+            </tr>
+            <tr>
+                <td width="40%" valign="top" align="center">
+               
+                </td>
+                <td width="20%" valign="top" align="center">
+                    
+                  @*  <div><button style="width:200px;" data-bind="click: function(){reportViewModel.SavePicker()}">Apply Selections</button></div>
+                    <div><button style="width:200px;" data-bind="click: function(){reportViewModel.ClosePicker()}">Cancel Selections</button></div>
+    *@
+                     <div class = "buttons" >  
+                        <button class="positive" style="width:200px; border-collapse:separate" data-bind="click: function(){reportViewModel.SavePicker()}" > 
+                            <img src="../../Content/images/saveBtn.png"  alt=""/> Save
+                        </button> 
+
+                        <button class="positive" style="width:200px;border-collapse:separate" data-bind="click: function(){reportViewModel.ClosePicker()}" > 
+                            <img src="../../Content/images/deleteBtn.png"  alt=""/> Cancel
+                        </button>
+                    
+                   </div>
+                </td>
+                <td width="40%" valign="top" align="center">
+               
+                    
+                </td>
+            </tr>
+            
+        </table>
+        
+       
+    </div> 
+    
+    </div>
+    </div>
+  
+<!-- TEMPLATE 1 -->
+  
+    <script type="text/html" id="filterRowTemplate">
+    <tr>
+     @*<td width="30px"><a href="#" data-bind="style: { width: '15px'},click: function() { reportViewModel.removeLine($data) }"> X </a></td>*@
+     <td width="30px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><a href="#" data-bind="style: { width: '15px'},visible: reportViewModel.ShowAdvancedFilter,click: function() { reportViewModel.moveLineUp($data) }">Up </a>
+     <a href="#" data-bind="style: { width: '15px'},visible: reportViewModel.ShowAdvancedFilter,click: function() { reportViewModel.moveLineDown($data) }">Down</a>
+     </td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    <td width="80px"> <span class="buttons" style="border-collapse:separate;" >  <button class="positive" data-bind="click: function() { reportViewModel.removeLine($data) }">  <img src="../../Content/images/garbageBtn.png"  alt=""/>Delete</button></span> </td>
+    <td width="85px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><select class="required" data-bind="style: { width: '80px'},visible: reportViewModel.MarketShareLiveFilterDetailsList.indexOf($data) > 0, options: reportViewModel.AndOrList,optionsText: 'Name',optionsValue:'Name', value: AndOr"></select></td>
+    <td width="35px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><input type="text" onkeypress="return openparen(event)" data-bind="style: { width: '30px'},value: OpenParenthesis, valueUpdate: 'afterkeydown'"/></td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    <td width="205px"><select class="required" data-bind="style: { width: '200px'},visible: AndOr,options: reportViewModel.DictionaryNonGeographicList,optionsText: 'FieldLabel',optionsValue:'Id', value: DataDictionaryId"></select></td>
+    <td width="167px"><select class="required" data-bind="style: { width: '167px'},visible: AndOr && DataDictionaryId,options: reportViewModel.OperatorList,optionsText: 'Name',optionsValue:'Value', value: Operation"></select></td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    <td width="300px"><input class="required" type="text" data-bind="style: { width: '200px'},visible: AndOr && DataDictionaryId && Operation,value: FieldValue"/>  <span class="buttons" style="border-collapse:separate;" > <button class="positive" data-bind="visible: AndOr && DataDictionaryId && (FieldType()!='N' && FieldType()!='I' ),click: function(){reportViewModel.SetPicker($data)}"> <img src="../../Content/images/selectBtn.png"  alt=""/> Select</button> </span> </td>
+    @*<a href="#" data-bind="visible: AndOr && DataDictionaryId && Operation,click: function(){reportViewModel.SetPicker($data)}">Picker</a>*@
+    <td width="30px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><input type="text" onkeypress="return closeparen(event)" data-bind="style: { width: '30px'},value: CloseParenthesis, valueUpdate: 'afterkeydown'"/></td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    
+
+    </tr>   
+    </script>
+	
+<!-- TEMPLATE 2 -->
+
+    <script type="text/html" id="filterRowTemplateGeographic">
+    <tr>
+     @*<td width="30px"><a href="#" data-bind="style: { width: '15px'},click: function() { reportViewModel.removeLine($data) }"> X </a></td>*@
+     <td width="30px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><a href="#" data-bind="style: { width: '15px'},visible: reportViewModel.ShowAdvancedFilter,click: function() { reportViewModel.moveLineUpGeographic($data) }">Up </a>
+     <a href="#" data-bind="style: { width: '15px'},visible: reportViewModel.ShowAdvancedFilter,click: function() { reportViewModel.moveLineDownGeographic($data) }">Down</a>
+     </td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    
+    <td width="80px"> <span class="buttons" style="border-collapse:separate;">  <button class="positive" data-bind="click: function() { reportViewModel.removeLineGeographic($data) }">  <img src="../../Content/images/garbageBtn.png"  alt=""/>Delete</button></span> </td>
+    <td width="85px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><select class="required" data-bind="style: { width: '80px'},visible: reportViewModel.MarketShareLiveFilterGeographicDetailsList.indexOf($data) > 0, options: reportViewModel.AndOrList,optionsText: 'Name',optionsValue:'Name', value: AndOr"></select></td>
+    <td width="35px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><input type="text" onkeypress="return openparen(event)" data-bind="style: { width: '30px'},value: OpenParenthesis, valueUpdate: 'afterkeydown'"/></td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    <td width="205px"><select class="required" data-bind="style: { width: '200px'},visible: AndOr,options: reportViewModel.DictionaryGeographicList,optionsText: 'FieldLabel',optionsValue:'Id', value: DataDictionaryId"></select></td>
+    <td width="167px"><select class="required" data-bind="style: { width: '167px'},visible: AndOr && DataDictionaryId,options: reportViewModel.OperatorList,optionsText: 'Name',optionsValue:'Value', value: Operation"></select></td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    <td width="300px"><input class="required" type="text" data-bind="style: { width: '200px'},visible: AndOr && DataDictionaryId && Operation,value: FieldValue"/>  <span class="buttons" style="border-collapse:separate;" > <button class="positive" data-bind="visible: AndOr && DataDictionaryId && (FieldType()!='N' && FieldType()!='I' ),click: function(){reportViewModel.SetPicker($data)}"> <img src="../../Content/images/selectBtn.png"  alt=""/> Select</button> </span> </td>
+    
+    @*<a href="#" data-bind="visible: AndOr && DataDictionaryId && Operation,click: function(){reportViewModel.SetPicker($data)}">Picker</a>*@
+    <td width="30px" data-bind="visible: reportViewModel.ShowAdvancedFilter"><input type="text" onkeypress="return closeparen(event)" data-bind="style: { width: '30px'},value: CloseParenthesis, valueUpdate: 'afterkeydown'"/></td data-bind="visible: reportViewModel.ShowAdvancedFilter">
+    
+
+    </tr>   
+    </script>

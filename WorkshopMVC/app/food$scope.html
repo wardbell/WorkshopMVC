@@ -1,0 +1,32 @@
+﻿<!-- Food View with $scope controller pattern -->
+<div ng-controller="food$scope">
+
+    <h3>{{vm.title}}</h3>
+    <!-- Twitter Bootstrap styling -->
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10">
+        
+                <table class="table table-condensed table-hover">
+                    <tr>
+                        <th>#</th>
+                        <th>Name </th>
+                        <th>Rating </th>
+                        <th>Notes </th>
+                        <th>Link</th>
+                    </tr>
+                    <tr ng-repeat="food in vm.foods">
+                        <td>{{$index+1}}</td>
+                        <td>{{food.name}}</td>
+                        <td>{{food.rating}}</td>
+                        <td>{{food.notes}}</td>
+                        <td><a ng-href="{{vm.link(food)}}">{{food.name}}</a></td>
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+

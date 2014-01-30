@@ -1,0 +1,19 @@
+﻿@model WorkshopMVC.Controllers.MyModel
+@{
+    ViewBag.Title = "Ng Sample #2";
+}
+
+<h2>Angular Sample #2</h2>
+<h3>Bootstrapping data with @@model</h3>
+<hr/>
+<div ng-app>
+    <p>Hello {{1 +1}} the World!</p>
+    <p>I'd like to say: '@Model.Message'</p>
+</div>
+
+@section scripts
+{
+<script src="~/Scripts/angular.min.js"></script>
+}
+
+
