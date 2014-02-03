@@ -51,10 +51,6 @@ namespace WorkshopMVC.Controllers
 
         public ActionResult Ng6()
         {
-            var model = GetDummyFoodData();
-            model.Message = "Doing it with templates";
-            model.Foods.Add(new Food { Name = "Cavier", Rating = 5, Notes = "NOW you're talking" });
-            model.Foods.Add(new Food { Name = "Cracked crab", Rating = 5, Notes = "'tis the season" });
             return View("Ng6");
         }
 
